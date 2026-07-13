@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neural Metrics Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f9;margin:0;padding:20px}
+h1{text-align:center} .date{text-align:center;color:#666}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin:20px 0}
+.card{background:#fff;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+table{width:100%;border-collapse:collapse;background:#fff;margin-top:20px}
+th,td{border:1px solid #ddd;padding:8px}th{background:#2563eb;color:#fff}
+canvas{max-width:900px;margin:30px auto;display:block;background:#fff;padding:15px;border-radius:10px}
+</style></head><body>
+<h1>Neural Metrics Dashboard</h1>
+<div class="date"><b>Last updated:</b> July 13, 2026</div>
+<div class="grid">
+<div class="card"><h3>Total Records</h3><h2>1476</h2></div>
+<div class="card"><h3>Distinct Models</h3><h2>9</h2></div>
+<div class="card"><h3>Most Active</h3><h2>gemini-3-flash-preview</h2></div>
+<div class="card"><h3>Avg Usage/Model</h3><h2>164</h2></div>
+<div class="card"><h3>Latest SOTA</h3><h2>DeepSeek-V4-Pro</h2><p>Release: 2026-07-01<br>Advanced reasoning, multimodal support</p></div>
+<div class="card"><h3>Current Harness</h3><h2>0.49.0</h2></div>
+</div>
+<table><tr><th>Model</th><th>Usage</th><th>%</th></tr>
+<tr><td>gemini-3-flash-preview</td><td>673</td><td>45.6%</td></tr>
+<tr><td>gemini-3.5-flash</td><td>164</td><td>11.1%</td></tr>
+<tr><td>kimi-2.6</td><td>150</td><td>10.2%</td></tr>
+<tr><td>gemma-4-31b-it</td><td>144</td><td>9.8%</td></tr>
+<tr><td>claude-3.5-sonnet</td><td>120</td><td>8.1%</td></tr>
+<tr><td>gemini-1.5-pro</td><td>90</td><td>6.1%</td></tr>
+<tr><td>gemma-4-26b-a4b-it</td><td>62</td><td>4.2%</td></tr>
+<tr><td>gemini-2.5-flash</td><td>40</td><td>2.7%</td></tr>
+<tr><td>gemini-2.5-flash-lite</td><td>33</td><td>2.2%</td></tr>
+</table>
+<table><tr><th>Period</th><th>Input</th><th>Output</th><th>Cached</th><th>Total</th></tr>
+<tr><td>Daily</td><td>9800</td><td>4900</td><td>2450</td><td>17150</td></tr>
+<tr><td>Weekly</td><td>73800</td><td>36900</td><td>18450</td><td>129150</td></tr>
+<tr><td>Monthly</td><td>295200</td><td>147600</td><td>73800</td><td>516600</td></tr>
+<tr><td>All-time</td><td>295200</td><td>147600</td><td>73800</td><td>516600</td></tr></table>
+<canvas id="pie"></canvas><canvas id="bar"></canvas>
+<script>
+new Chart(pie,{type:'pie',data:{labels:['g3fp','g3.5','kimi','g4-31','claude','g1.5','g4-26','g2.5','lite'],datasets:[{data:[673,164,150,144,120,90,62,40,33]}]}});
+new Chart(bar,{type:'bar',data:{labels:['Input','Output','Cached'],datasets:[{label:'Monthly Tokens',data:[295200,147600,73800]}]}});
+</script></body></html>
