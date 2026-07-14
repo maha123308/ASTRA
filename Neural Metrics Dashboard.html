@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Metrics Dashboard</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-accent: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #38bdf8;
+            --accent-green: #34d399;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding: 2rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h1::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .last-updated {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            background-color: var(--bg-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Top Grid - SOTA and Stats */
+        .top-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .top-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Component */
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        /* SOTA Info Highlight */
+        .sota-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sota-card::after {
+            content: 'SOTA';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: rgba(56, 189, 248, 0.15);
+            color: var(--accent-color);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .sota-title {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .sota-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 0.25rem;
+        }
+
+        .sota-release {
+            font-size: 0.825rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .sota-desc {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        /* KPI Micro-Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .kpi-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .kpi-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Main Content Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-left: 3px solid var(--accent-color);
+            padding-left: 0.5rem;
+        }
+
+        /* Tables styling */
+        .table-container {
+            overflow-x: auto;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .model-name {
+            font-family: monospace;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        /* Progress Bar for Usage */
+        .progress-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .progress-bar-bg {
+            background-color: var(--bg-accent);
+            width: 60px;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            border-radius: 3px;
+        }
+
+        /* Badge details */
+        .badge {
+            background-color: var(--bg-accent);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <header>
+        <div>
+            <h1>Neural Metrics Dashboard</h1>
+        </div>
+        <div class="last-updated">
+            Last updated: July 13, 2026
+        </div>
+    </header>
+
+    <div class="top-grid">
+        
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Records</div>
+                <div class="kpi-value">1,476</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Distinct Models</div>
+                <div class="kpi-value">9</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Avg Usage / Model</div>
+                <div class="kpi-value">164</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Total Tokens</div>
+                <div class="kpi-value">516,600</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Most Active Model</div>
+                <div class="kpi-value" style="font-size: 1rem; color: var(--accent-color);">gemini-3-flash-preview</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Current Harness</div>
+                <div class="kpi-value"><span class="badge">v0.49.0</span></div>
+            </div>
+        </div>
+
+        <div class="card sota-card">
+            <div>
+                <div class="sota-title">Latest SOTA Model</div>
+                <div class="sota-name">DeepSeek-V4-Pro</div>
+                <div class="sota-release">Released: July 01, 2026</div>
+            </div>
+            <div class="sota-desc">
+                Features advanced reasoning capabilities alongside comprehensive multimodal support.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="main-grid">
+        
+        <div>
+            <h2>Model Usage Distribution</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th class="text-right">Usage</th>
+                            <th class="text-right">Share %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="model-name">gemini-3-flash-preview</td>
+                            <td class="text-right">673</td>
+                            <td class="text-right">
+                                <div class="progress-cell" style="justify-content: flex-end;">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 45.6%;"></div></div>
+                                    <span>45.6%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="model-name">gemini-3.5-flash</td>
+                            <td class="text-right">164</td>
+                            <td class="text-right">
+                                <div class="progress-cell" style="justify-content: flex-end;">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 11.1%;"></div></div>
+                                    <span>11.1%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="model-name">kimi-2.6</td>
+                            <td class="text-right">150</td>
+                            <td class="text-right">
+                                <div class="progress-cell" style="justify-content: flex-end;">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 10.2%;"></div></div>
+                                    <span>10.2%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="model-name">gemma-4-31b-it</td>
+                            <td class="text-right">144</td>
+                            <td class="text-right">
+                                <div class="progress-cell" style="justify-content: flex-end;">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 9.8%;"></div></div>
+                                    <span>9.8%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="model-name">claude-3.5-sonnet</td>
+                            <td class="text-right">120</td>
+                            <td class="text-right">
+                                <div class="progress-cell" style="justify-content: flex-end;">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 8.1%;"></div></div>
+                                    <span>8.1%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="model-name">gemini-1.5-pro</td>
+                            <td class="text-right">90</td>
+                            <td class="text-right">
+                                <div class="progress-cell" style="justify-content: flex-end;">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 6.1%;"></div></div>
+                                    <span>6.1%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="model-name">gemma-4-26b-a4b-it</td>
+                            <td class="text-right">62</td>
+                            <td class="text-right">
+                                <div class="progress-cell" style="justify-content: flex-end;">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 4.2%;"></div></div>
+                                    <span>4.2%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="model-name">gemini-2.5-flash</td>
+                            <td class="text-right">40</td>
+                            <td class="text-right">
+                                <div class="progress-cell" style="justify-content: flex-end;">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 2.7%;"></div></div>
+                                    <span>2.7%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="model-name">gemini-2.5-flash-lite</td>
+                            <td class="text-right">33</td>
+                            <td class="text-right">
+                                <div class="progress-cell" style="justify-content: flex-end;">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 2.2%;"></div></div>
+                                    <span>2.2%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <h2>Token Period Breakdown</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th class="text-right">Input</th>
+                            <th class="text-right">Output</th>
+                            <th class="text-right">Cached</th>
+                            <th class="text-right" style="color: var(--accent-color);">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Daily</strong></td>
+                            <td class="text-right">9,800</td>
+                            <td class="text-right">4,900</td>
+                            <td class="text-right" style="color: var(--text-secondary);">2,450</td>
+                            <td class="text-right" style="font-weight: 600;">17,150</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Weekly</strong></td>
+                            <td class="text-right">73,800</td>
+                            <td class="text-right">36,900</td>
+                            <td class="text-right" style="color: var(--text-secondary);">18,450</td>
+                            <td class="text-right" style="font-weight: 600;">129,150</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Monthly</strong></td>
+                            <td class="text-right">295,200</td>
+                            <td class="text-right">147,600</td>
+                            <td class="text-right" style="color: var(--text-secondary);">73,800</td>
+                            <td class="text-right" style="font-weight: 600;">516,600</td>
+                        </tr>
+                        <tr style="border-top: 2px solid var(--border-color); background-color: rgba(56, 189, 248, 0.05);">
+                            <td><strong>All-time</strong></td>
+                            <td class="text-right">3,542,400</td>
+                            <td class="text-right">1,771,200</td>
+                            <td class="text-right" style="color: var(--text-secondary);">885,600</td>
+                            <td class="text-right" style="font-weight: 700; color: var(--accent-green);">6,199,200</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
